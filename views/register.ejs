@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>Registration Confirmation</title>
+    <meta name="description" content="Reset Password" />
+    <style type="text/css">
+      a:hover {
+        text-decoration: underline !important;
+      }
+      .confirm-header {
+        background-color: #7bb041;
+        color: #fff;
+        border-radius: 5px;
+        border-bottom-left-radius: 0px;
+        border-bottom-right-radius: 0px;
+        padding: 30px;
+        font-size: 30px;
+      }
+      .confirm-body {
+        background-color: black;
+        color: #fff;
+        padding: 10px 20px;
+      }
+      .confirm-body button {
+        background-color: #7bb041 !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 5px;
+        padding: 5px 15px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+
+  <body
+    marginheight="0"
+    topmargin="0"
+    marginwidth="0"
+    style="margin: 0px; background-color: #f2f3f8"
+    leftmargin="0"
+  >
+    <!--100% body table-->
+    <div className="col-3">
+      <div className="confirm">
+        <div className="confirm-header">Verify your email adddress</div>
+        <div className="confirm-body">
+          <h6>Hi <%= user %>,</h6>
+          <p>
+            Thank you for signing up at vaidyanearme,to complete the
+            registration,please verify email address.
+          </p>
+          <p>
+            To activate your account simply click on the link below and verify
+            your email address within 24 hours, For your safety, you will not be
+            able to access your account until verification of your email has
+            been completes.
+          </p>
+          <a
+            href="<%= restPass %>"
+            style="
+              background: #20e277;
+              text-decoration: none !important;
+              font-weight: 500;
+              margin-top: 35px;
+              color: #fff;
+              text-transform: uppercase;
+              font-size: 14px;
+              padding: 10px 24px;
+              display: inline-block;
+              border-radius: 50px;
+            "
+            >Verify Email Address</a
+          >
+          <!-- <button className="d-flex flex-wrap">Confirm Email Address</button> -->
+          <p className="text-center">
+            If you did not sign up for this account you can ignore this email.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/100% body table-->
+  </body>
+</html>
