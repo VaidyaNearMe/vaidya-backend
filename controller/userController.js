@@ -10,7 +10,6 @@ const { uploadImagesToFierbase, deleteFileFromFirebase } = require("../middlewar
 const ejs = require("ejs");
 const path = require("path");
 const { default: mongoose } = require("mongoose");
-
 // create
 const registerUser = async (req, res, next) => {
     try {
@@ -61,7 +60,7 @@ const registerUser = async (req, res, next) => {
             );
             await sendEmail({
                 email: email,
-                subject: `Jogi register`,
+                subject: `Congratulations…. Your Registration is Being Processed`,
                 data
             });
             console.log("Email sent on:", email);
@@ -122,6 +121,16 @@ const updateUser = async (req, res, next) => {
         });
 
         await user.save();
+
+        const data = await ejs.renderFile(
+            path.join(__dirname, "../views/updateUser.ejs"), { user: user.name }
+        );
+
+        await sendEmail({
+            email: user?.email,
+            subject: `Your request for profile update is registered.`,
+            data
+        });
 
         const userWithoutPassword = { ...user.toObject() };
         delete userWithoutPassword.password;
@@ -233,11 +242,10 @@ const forgotPassword = async (req, res, next) => {
     try {
         try {
             await sendEmail({
-                email: req.body.email,
+                email: user.email,
                 subject: `Vaidyanearme password Recovery`,
                 data
             });
-            console.log("Email sent on:", email);
         } catch (emailError) {
             console.error("Failed to send email:", emailError);
             return next(new ErrorHandler("Failed to send registration email", StatusCodes.INTERNAL_SERVER_ERROR));
@@ -394,7 +402,6 @@ const changeUserStatus = async (req, res, next) => {
         if (!user) {
             return res.status(StatusCodes.NOT_FOUND).json({ error: 'User not found' });
         }
-
         if (status == "Approved") {
             try {
                 const data = await ejs.renderFile(
@@ -402,17 +409,17 @@ const changeUserStatus = async (req, res, next) => {
                 );
                 await sendEmail({
                     email: user?.email,
-                    subject: `Congratulations! Your Profile is Approved on VaidyaNearMe`,
+                    subject: `Your profile has been successfully updated.`,
                     data
                 });
             } catch (emailError) {
                 console.error("Failed to send email:", emailError);
                 return next(new ErrorHandler("Failed to send registration email", StatusCodes.INTERNAL_SERVER_ERROR));
             }
+            user.status = status;
+            await user.save();
         } else {
             try {
-                
-                const user = await User.findById(userId);
 
                 if (!user) {
                     return next(new ErrorHandler("User not found", StatusCodes.NOT_FOUND));
@@ -429,11 +436,15 @@ const changeUserStatus = async (req, res, next) => {
                 }
 
                 await User.findByIdAndDelete(userId);
-                console.log("user deleted successfully on reject user")
+                
+                const data = await ejs.renderFile(
+                    path.join(__dirname, "../views/rejected.ejs"), { user: user.name }
+                );
+
                 await sendEmail({
                     email: user?.email,
-                    subject: `Decline your request`,
-                    data: "Jogi ayurvaidya decline your listing request."
+                    subject: `Your profile has been rejected.`,
+                    data: data
                 });
                 console.log("Email sent successfully on reject")
             } catch (emailError) {
@@ -442,8 +453,6 @@ const changeUserStatus = async (req, res, next) => {
             }
         }
 
-        user.status = status;
-        await user.save();
         const userWithoutPassword = { ...user.toObject() };
         delete userWithoutPassword.password;
         return res.status(StatusCodes.OK).json({

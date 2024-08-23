@@ -16,7 +16,10 @@ const updateRequestSchema = new mongoose.Schema({
     address: String,
     city: String,
     qualification: String,
-    speciality: String,
+    speciality: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Specialities'
+    }],
     university: String,
     hospital: String,
     website: String

@@ -69,6 +69,24 @@ const approveUpdateRequest = async (req, res, next) => {
 
         if (status !== "Approved") {
             await UpdateRequest.findByIdAndDelete(requestId); // delete the update request if status is not "Approved"
+            const data = await ejs.renderFile(
+                path.join(__dirname, "../views/rejected.ejs"), { user: user.name }
+            );
+
+            await sendEmail({
+                email: user?.email,
+                subject: `Your profile has been rejected.`,
+                data: data
+            });
+        }else {
+            const data = await ejs.renderFile(
+                path.join(__dirname, "../views/approvregister.ejs"), { user: user.name }
+            );
+            await sendEmail({
+                email: user?.email,
+                subject: `Your profile has been successfully updated.`,
+                data
+            });
         }
 
         // try {
@@ -112,7 +130,10 @@ const getAllUpdateRequests = async (req, res, next) => {
 
 const getPendingRequests = async (req, res, next) => {
     try {
-        const updateRequests = await UpdateRequest.find({ status: "Pending" }).populate('user');
+        const updateRequests = await UpdateRequest.find({ status: "Pending" }).populate({ path : 'user', populate: {
+            path: 'specialities',  // Populate the specialities field within user
+            model: 'Specialities'
+        }}).populate('updateData.speciality');
 
         return res.status(StatusCodes.OK).json({
             status: StatusCodes.OK,
