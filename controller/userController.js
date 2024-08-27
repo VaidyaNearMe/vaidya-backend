@@ -405,11 +405,11 @@ const changeUserStatus = async (req, res, next) => {
         if (status == "Approved") {
             try {
                 const data = await ejs.renderFile(
-                    path.join(__dirname, "../views/approvregister.ejs"), { user: user.name }
+                    path.join(__dirname, "../views/profileApproveRegister.ejs"), { user: user.name }
                 );
                 await sendEmail({
                     email: user?.email,
-                    subject: `Your profile has been successfully updated.`,
+                    subject: `Registration Update: Successfully Completed.`,
                     data
                 });
             } catch (emailError) {
@@ -426,19 +426,19 @@ const changeUserStatus = async (req, res, next) => {
                 }
 
                 if (user?.avatar) {
-                    await deleteFileFromFirebase(user.avatar);
+                    await deleteFileFromFirebase(user?.avatar);
                 }
                 if (user?.certificate) {
-                    await deleteFileFromFirebase(user.certificate);
+                    await deleteFileFromFirebase(user?.certificate);
                 }
                 if (user?.nabh) {
-                    await deleteFileFromFirebase(user.nabh);
+                    await deleteFileFromFirebase(user?.nabh);
                 }
 
                 await User.findByIdAndDelete(userId);
                 
                 const data = await ejs.renderFile(
-                    path.join(__dirname, "../views/rejected.ejs"), { user: user.name }
+                    path.join(__dirname, "../views/profileRejected.ejs"), { user: user.name }
                 );
 
                 await sendEmail({

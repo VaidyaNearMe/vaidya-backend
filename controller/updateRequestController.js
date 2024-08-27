@@ -3,6 +3,8 @@ const ErrorHandler = require("../middleware/errorhander");
 const UpdateRequest = require("../models/updateRequestModel");
 const User = require("../models/userModel");
 const sendEmail = require("../utils/SendEmail");
+const ejs = require("ejs");
+const path = require("path");
 
 const requestUpdateUser = async (req, res, next) => {
     try {
@@ -15,7 +17,7 @@ const requestUpdateUser = async (req, res, next) => {
             return next(new ErrorHandler("User not found", StatusCodes.NOT_FOUND));
         }
 
-        const previousRequest = await UpdateRequest.find({user: userId});
+        const previousRequest = await UpdateRequest.find({user: userId, status : "Pending"});
 
         if(previousRequest?.length > 0){
             return res.status(StatusCodes.BAD_GATEWAY).json({
@@ -70,20 +72,20 @@ const approveUpdateRequest = async (req, res, next) => {
         if (status !== "Approved") {
             await UpdateRequest.findByIdAndDelete(requestId); // delete the update request if status is not "Approved"
             const data = await ejs.renderFile(
-                path.join(__dirname, "../views/rejected.ejs"), { user: user.name }
+                path.join(__dirname, "../views/rejected.ejs"), { user: updateRequest.user.name }
             );
 
             await sendEmail({
-                email: user?.email,
+                email: updateRequest.user?.email,
                 subject: `Your profile has been rejected.`,
                 data: data
             });
         }else {
             const data = await ejs.renderFile(
-                path.join(__dirname, "../views/approvregister.ejs"), { user: user.name }
+                path.join(__dirname, "../views/approvregister.ejs"), { user: updateRequest.updateData.name }
             );
             await sendEmail({
-                email: user?.email,
+                email: updateRequest.updateData?.email,
                 subject: `Your profile has been successfully updated.`,
                 data
             });
@@ -133,7 +135,7 @@ const getPendingRequests = async (req, res, next) => {
         const updateRequests = await UpdateRequest.find({ status: "Pending" }).populate({ path : 'user', populate: {
             path: 'specialities',  // Populate the specialities field within user
             model: 'Specialities'
-        }}).populate('updateData.speciality');
+        }}).populate('updateData.specialities');
 
         return res.status(StatusCodes.OK).json({
             status: StatusCodes.OK,
