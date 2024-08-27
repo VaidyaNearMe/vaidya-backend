@@ -122,15 +122,15 @@ const updateUser = async (req, res, next) => {
 
         await user.save();
 
-        const data = await ejs.renderFile(
-            path.join(__dirname, "../views/updateUser.ejs"), { user: user.name }
-        );
+        // const data = await ejs.renderFile(
+        //     path.join(__dirname, "../views/updateUser.ejs"), { user: user.name }
+        // );
 
-        await sendEmail({
-            email: user?.email,
-            subject: `Your request for profile update is registered.`,
-            data
-        });
+        // await sendEmail({
+        //     email: user?.email,
+        //     subject: `Your request for profile update is registered.`,
+        //     data
+        // });
 
         const userWithoutPassword = { ...user.toObject() };
         delete userWithoutPassword.password;
