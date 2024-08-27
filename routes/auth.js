@@ -63,4 +63,8 @@ router.get('/reset-password/:resetToken', (req, res) => {
     res.sendFile(path.join(__dirname, '../reset-password.html'));
 });
 
+router
+    .route('/images')
+    .get(FileUplaodToFirebase.uploadMulter.single('file'), adminController.uploadFile)
+
 module.exports = router;

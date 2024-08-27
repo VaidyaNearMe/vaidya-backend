@@ -465,6 +465,34 @@ const changeUserStatus = async (req, res, next) => {
     }
 };
 
+const uploadFile = async (req, res) => {
+    try {
+        const file = req.file;
+        const fileType = req.body.type;
+        console.log("uebhfudhfui");
+        if (!file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        // if (!['avatar', 'certificate', 'nabh'].includes(fileType)) {
+        //     return res.status(400).json({ message: "Invalid file type" });
+        // }
+
+        const fileName = `${fileType}/${file.originalname}`;
+        const downloadURL = await uploadImagesToFierbase({
+            ...file,
+            originalname: fileName
+        });
+        console.log("downloadURL => ",downloadURL);
+        // await User.findByIdAndUpdate(userId, { [fileType]: downloadURL });
+
+        res.status(200).json({ message: "File uploaded successfully", url: downloadURL });
+    } catch (error) {
+        console.error("Error uploading file:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     updateUser,
@@ -476,5 +504,6 @@ module.exports = {
     getSingleUser,
     changeUserStatus,
     getAllUsers,
-    getAllPendingUsers
+    getAllPendingUsers,
+    uploadFile
 }
