@@ -82,12 +82,12 @@ const approveUpdateRequest = async (req, res, next) => {
         if (status !== "Approved") {
             await UpdateRequest.findByIdAndDelete(requestId); // delete the update request if status is not "Approved"
             const data = await ejs.renderFile(
-                path.join(__dirname, "../views/rejected.ejs"), { user: updateRequest.user.name }
+                path.join(__dirname, "../views/profileRejected.ejs"), { user: updateRequest.user.name }
             );
 
             await sendEmail({
                 email: updateRequest.user?.email,
-                subject: `Your profile has been rejected.`,
+                subject: `Your profile update request was rejected.`,
                 data: data
             });
         }else {
