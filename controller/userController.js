@@ -12,6 +12,7 @@ const path = require("path");
 const { default: mongoose } = require("mongoose");
 const firebaseStorage = require("firebase/storage");
 const storage = firebaseStorage.getStorage();
+const UpdateRequest = require("../models/updateRequestModel");
 
 // create
 const registerUser = async (req, res, next) => {
@@ -470,6 +471,17 @@ const changeUserStatus = async (req, res, next) => {
 
 const uploadImage = async (req, res) => {
     try {
+        let {userId} = req.params
+        const user = await UpdateRequest.find({user: userId, status : "Pending"});
+
+        if(user?.length > 0){
+            return res.status(StatusCodes.BAD_GATEWAY).json({
+                status: StatusCodes.BAD_GATEWAY,
+                success: false,
+                message: "Your request alredy added",
+            });
+        }
+
         if (req.file){
             const downloadURL = await uploadImagesToFierbase(req.file);
             return res.status(StatusCodes.OK).json({success: true, downloadURL})
@@ -484,6 +496,16 @@ const uploadImage = async (req, res) => {
 
 const deleteImage = async (req, res) => {
     try {
+        let {userId} = req.params
+        const user = await UpdateRequest.find({user: userId, status : "Pending"});
+
+        if(user?.length > 0){
+            return res.status(StatusCodes.BAD_GATEWAY).json({
+                status: StatusCodes.BAD_GATEWAY,
+                success: false,
+                message: "Your request alredy added",
+            });
+        }
         
         const { fileUrl } = req.body;  // URL of the file to delete (if provided)
 
