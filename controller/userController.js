@@ -257,7 +257,8 @@ const forgotPassword = async (req, res, next) => {
         res.status(StatusCodes.OK).json({
             status: StatusCodes.OK,
             success: true,
-            message: `Email sent to ${resetPasswordUrl}`
+            // message: `Email sent to ${resetPasswordUrl}`
+            message: `Reset password link send in url`
         })
     } catch (error) {
         user.resetPasswordToken = undefined
