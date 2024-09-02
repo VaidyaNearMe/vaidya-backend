@@ -64,7 +64,11 @@ router.get('/reset-password/:resetToken', (req, res) => {
 });
 
 router
-    .route('/images')
-    .get(FileUplaodToFirebase.uploadMulter.single('file'), adminController.uploadFile)
+    .route('/upload')
+    .post(FileUplaodToFirebase.uploadMulter.single('file'), adminController.uploadImage)
+
+router
+    .route('/image/delete')
+    .post(adminController.deleteImage)
 
 module.exports = router;

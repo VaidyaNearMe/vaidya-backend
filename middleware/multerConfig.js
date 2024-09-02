@@ -50,4 +50,10 @@ const deleteFileFromFirebase = async (fileName) => {
     }
 };
 
-module.exports = { uploadImagesToFierbase, uploadMulter, deleteFileFromFirebase };
+const getFileNameFromURL = (url) => {
+    const urlObj = new URL(url);
+    const path = urlObj.pathname.split('/o/')[1];  // Get the path after '/o/'
+    return decodeURIComponent(path.split('?')[0]);  // Decode URL and remove query params
+};
+
+module.exports = { uploadImagesToFierbase, uploadMulter, getFileNameFromURL, deleteFileFromFirebase };

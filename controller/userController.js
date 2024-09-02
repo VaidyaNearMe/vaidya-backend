@@ -6,10 +6,13 @@ const { StatusCodes } = require("http-status-codes");
 const validator = require('validator');
 const crypto = require('crypto');
 const sendEmail = require("../utils/SendEmail")
-const { uploadImagesToFierbase, deleteFileFromFirebase } = require("../middleware/multerConfig");
+const { uploadImagesToFierbase, deleteFileFromFirebase, getFileNameFromURL } = require("../middleware/multerConfig");
 const ejs = require("ejs");
 const path = require("path");
 const { default: mongoose } = require("mongoose");
+const firebaseStorage = require("firebase/storage");
+const storage = firebaseStorage.getStorage();
+
 // create
 const registerUser = async (req, res, next) => {
     try {
@@ -465,31 +468,36 @@ const changeUserStatus = async (req, res, next) => {
     }
 };
 
-const uploadFile = async (req, res) => {
+const uploadImage = async (req, res) => {
     try {
-        const file = req.file;
-        const fileType = req.body.type;
-        console.log("uebhfudhfui");
-        if (!file) {
-            return res.status(400).json({ message: "No file uploaded" });
+        if (req.file){
+            const downloadURL = await uploadImagesToFierbase(req.file);
+            return res.status(StatusCodes.OK).json({success: true, downloadURL})
+        } else {
+            return res.status(StatusCodes.NOT_FOUND).json({error : "Image not found"})
         }
-
-        // if (!['avatar', 'certificate', 'nabh'].includes(fileType)) {
-        //     return res.status(400).json({ message: "Invalid file type" });
-        // }
-
-        const fileName = `${fileType}/${file.originalname}`;
-        const downloadURL = await uploadImagesToFierbase({
-            ...file,
-            originalname: fileName
-        });
-        console.log("downloadURL => ",downloadURL);
-        // await User.findByIdAndUpdate(userId, { [fileType]: downloadURL });
-
-        res.status(200).json({ message: "File uploaded successfully", url: downloadURL });
     } catch (error) {
-        console.error("Error uploading file:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
+        console.error("Error processing request:", error);
+        return next(new ErrorHandler( "Failed to process request", StatusCodes.INTERNAL_SERVER_ERROR ));
+    }
+};
+
+const deleteImage = async (req, res) => {
+    try {
+        
+        const { fileUrl } = req.body;  // URL of the file to delete (if provided)
+
+        if (fileUrl) {
+            const fileName = await getFileNameFromURL(fileUrl);
+            const storageRef = firebaseStorage.ref(storage, fileName);
+            await firebaseStorage.deleteObject(storageRef)
+            return res.status(StatusCodes.OK).json({success: true, message : "Image succefully deleted"});
+        } else {
+            return next(new ErrorHandler("Image not found", StatusCodes.NOT_FOUND));
+        }
+    } catch (error) {
+        console.error("Error processing request:", error);
+        return next(new ErrorHandler( "Failed to process request", StatusCodes.INTERNAL_SERVER_ERROR ));
     }
 };
 
@@ -505,5 +513,6 @@ module.exports = {
     changeUserStatus,
     getAllUsers,
     getAllPendingUsers,
-    uploadFile
+    uploadImage,
+    deleteImage
 }
